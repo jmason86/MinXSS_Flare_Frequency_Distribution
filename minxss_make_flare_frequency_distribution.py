@@ -1,12 +1,19 @@
 from scipy.io.idl import readsav
+import astropy.units as u
 import matplotlib.pyplot as plt
 
-
+# Read data
 data_path = '/Users/jmason86/Dropbox/minxss_dropbox/data/fm1/level1/'
-
 data = readsav('{}minxss1_l1_mission_length_v2.sav'.format(data_path))
 minxsslevel1 = data.minxsslevel1.x123[0].copy()
 
+# Convert energy units from keV to erg
+energy = minxsslevel1[0]['energy']
+energy = u.keV.to(u.erg, energy) * u.erg
+
+
+
+# Example spectrum plot
 spectrum_index = 2913
 plt.plot(minxsslevel1[spectrum_index]['energy'], minxsslevel1[spectrum_index]['irradiance'], drawstyle='steps-mid')
 plt.xlim([0.8, 2.5])

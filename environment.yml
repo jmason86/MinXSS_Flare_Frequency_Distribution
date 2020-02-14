@@ -4,6 +4,7 @@ channels:
   - defaults
 dependencies:
   - appnope=0.1.0=py37_1000
+  - astropy=4.0=py37h0b31af3_1
   - backcall=0.1.0=py_0
   - ca-certificates=2019.11.28=hecc5488_0
   - certifi=2019.11.28=py37_0
