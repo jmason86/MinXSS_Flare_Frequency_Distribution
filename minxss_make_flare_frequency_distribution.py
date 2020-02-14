@@ -1,3 +1,4 @@
+import numpy as np
 from scipy.io.idl import readsav
 import astropy.units as u
 import matplotlib.pyplot as plt
@@ -11,7 +12,9 @@ minxsslevel1 = data.minxsslevel1.x123[0].copy()
 energy = minxsslevel1[0]['energy']
 energy = u.keV.to(u.erg, energy) * u.erg
 
-
+# Sum all spectra -- one value per time
+irradiance = np.stack(minxsslevel1['irradiance'])
+summed_energy = np.nansum(irradiance, axis=1)
 
 # Example spectrum plot
 spectrum_index = 2913
