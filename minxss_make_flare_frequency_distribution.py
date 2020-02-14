@@ -3,18 +3,24 @@ from scipy.io.idl import readsav
 import astropy.units as u
 import matplotlib.pyplot as plt
 
+
+def integrate_spectrum_energy(irradiance, energy):
+    irradiance_masked = np.ma.array(irradiance, mask=np.isnan(irradiance))
+    return np.trapz(irradiance_masked, energy)
+
+
 # Read data
 data_path = '/Users/jmason86/Dropbox/minxss_dropbox/data/fm1/level1/'
 data = readsav('{}minxss1_l1_mission_length_v2.sav'.format(data_path))
 minxsslevel1 = data.minxsslevel1.x123[0].copy()
 
-# Convert energy units from keV to erg
-energy = minxsslevel1[0]['energy']
-energy = u.keV.to(u.erg, energy) * u.erg
-
 # Sum all spectra -- one value per time
 irradiance = np.stack(minxsslevel1['irradiance'])
-summed_energy = np.nansum(irradiance, axis=1)
+energy = minxsslevel1[0]['energy']
+integrated_irradiance_energy = integrate_spectrum_energy(irradiance, energy) * (u.photon / u.second / u.centimeter**2)
+
+# Convert energy units from keV to erg
+energy = u.keV.to(u.erg, energy) * u.erg
 
 # Example spectrum plot
 spectrum_index = 2913
@@ -28,3 +34,4 @@ plt.suptitle('MinXSS Solar SXR Spectrum on ' + minxsslevel1[spectrum_index]['tim
 plt.show()
 
 pass
+
