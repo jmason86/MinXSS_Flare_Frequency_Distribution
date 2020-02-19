@@ -20,13 +20,19 @@ def integrate_photon_flux_1au(flux):
 
 
 def extract_time_jd(minxsslevel1):
-    return [minxsslevel1['time'][i]['jd'][0] for i in range(len(minxsslevel1))]
+    return np.array([minxsslevel1['time'][i]['jd'][0] for i in range(len(minxsslevel1))])
 
 
 # Read data
 data_path = '/Users/jmason86/Dropbox/minxss_dropbox/data/fm1/level1/'
 data = readsav('{}minxss1_l1_mission_length_v2.sav'.format(data_path))
 minxsslevel1 = data.minxsslevel1.x123[0].copy()
+
+goes_events_path = '/Users/jmason86/Dropbox/Research/Data/GOES/events/'
+data_goes = readsav('{}GOES_events_MinXSS1_era.sav'.format(goes_events_path))
+goes_events = data_goes.goesevents.copy()
+goes_start_jd = goes_events['eventstarttimejd']
+goes_end_jd = goes_start_jd + 1/24  # Nearly all flares are << 1 hour. The post-flare time intensity is much smaller and will add little to the time-integrated value
 
 # Integrate spectra across energy to produce one value per time
 spectral_irradiance = np.stack(minxsslevel1['irradiance']) * (u.photon / u.second / u.centimeter**2 / u.keV)
@@ -35,7 +41,13 @@ irradiance = integrate_spectrum_energy(spectral_irradiance, energy) * (u.photon 
 
 # Now integrate that across the times of all flares
 time_jd = extract_time_jd(minxsslevel1)
-photon_flux = integrate_spectrum_time(irradiance[0:50], time_jd[0:50])
+# Loop through all the flares identified by GOES
+photon_flux = []
+for i in range(len(goes_start_jd)):
+    flare_time_indices = np.where((time_jd >= goes_start_jd[i]) & (time_jd <= goes_end_jd[i]))
+    if flare_time_indices[0].size > 1:
+        photon_flux.append(integrate_spectrum_time(irradiance[flare_time_indices], time_jd[flare_time_indices]))
+
 
 # Now integrate that over 1 AU to get rid of the / cm^2
 photons = integrate_photon_flux_1au(photon_flux)
