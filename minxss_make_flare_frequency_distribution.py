@@ -1,7 +1,9 @@
 import numpy as np
 from scipy.io.idl import readsav
 import astropy.units as u
+import matplotlib as mpl
 import matplotlib.pyplot as plt
+mpl.use('macosx')
 
 
 def integrate_spectrum_energy(spectral_irradiance, energy):
@@ -15,8 +17,8 @@ def integrate_spectrum_time(irradiance, time_jd):
     return np.trapz(irradiance, time_seconds)
 
 
-def integrate_photon_flux_1au(flux):
-    return flux * 4 * np.pi * ((1*u.AU).to(u.cm))**2
+def integrate_photon_flux_1au(fluxes):
+    return [flux * 4 * np.pi * ((1*u.AU).to(u.cm))**2 for flux in fluxes]
 
 
 def extract_time_jd(minxsslevel1):
@@ -42,33 +44,29 @@ irradiance = integrate_spectrum_energy(spectral_irradiance, energy) * (u.photon 
 # Now integrate that across the times of all flares
 time_jd = extract_time_jd(minxsslevel1)
 # Loop through all the flares identified by GOES
-photon_flux = []
+photon_fluxes = []
 for i in range(len(goes_start_jd)):
     flare_time_indices = np.where((time_jd >= goes_start_jd[i]) & (time_jd <= goes_end_jd[i]))
     if flare_time_indices[0].size > 1:
-        photon_flux.append(integrate_spectrum_time(irradiance[flare_time_indices], time_jd[flare_time_indices]))
+        photon_fluxes.append(integrate_spectrum_time(irradiance[flare_time_indices], time_jd[flare_time_indices]))
 
 
 # Now integrate that over 1 AU to get rid of the / cm^2
-photons = integrate_photon_flux_1au(photon_flux)
+photons = integrate_photon_flux_1au(photon_fluxes)
 
 # Convert energy units from keV to erg
 energy = u.keV.to(u.erg, energy) * u.erg
 
 # Convert photons to energy
 mean_energy = np.ma.array(energy, mask=(energy < 0)).mean() / u.photon
-measured_energy = photons * mean_energy
+measured_energy = [photon * mean_energy for photon in photons]
 
-# Example spectrum plot
-spectrum_index = 2913
-plt.plot(minxsslevel1[spectrum_index]['energy'], minxsslevel1[spectrum_index]['irradiance'], drawstyle='steps-mid')
-plt.xlim([0.8, 2.5])
-plt.xlabel('Energy [keV]')
-plt.ylim([1e4, 1e9])
-plt.yscale('log')
-plt.ylabel('Irradiance [photons / sec / cm$^2$ / keV]')
-plt.suptitle('MinXSS Solar SXR Spectrum on ' + minxsslevel1[spectrum_index]['time']['human'][0].decode("utf-8"))
-plt.show()
+# Make a histogram
+m_e = np.array([m.value for m in measured_energy])
+logbins = np.geomspace(m_e.min(), m_e.max(), 8)
+plt.hist(m_e, bins=logbins)
+plt.xscale('log')
+plt.xlabel('SXR Flare Energy [erg]')
 
 pass
 
