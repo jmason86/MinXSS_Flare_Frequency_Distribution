@@ -61,12 +61,29 @@ energy = u.keV.to(u.erg, energy) * u.erg
 mean_energy = np.ma.array(energy, mask=(energy < 0)).mean() / u.photon
 measured_energy = [photon * mean_energy for photon in photons]
 
-# Make a histogram
+# Prepare for histograms
 m_e = np.array([m.value for m in measured_energy])
-logbins = np.geomspace(m_e.min(), m_e.max(), 8)
-plt.hist(m_e, bins=logbins)
-plt.xscale('log')
-plt.xlabel('SXR Flare Energy [erg]')
+logbins = np.geomspace(m_e.min(), m_e.max(), 30)
+
+
+# Make a histogram
+def plot_histogram():
+    plt.hist(m_e, bins=logbins)
+    plt.xscale('log')
+    plt.xlabel('SXR Solar Flare Energy [erg]')
+    plt.ylabel('Number [of {}]'.format(len(m_e)))
+
+
+def plot_ffd():
+    plt.figure()
+    plt.hist(m_e, bins=logbins, density=True, histtype='step', cumulative=-1)
+    plt.xscale('log')
+    plt.xlabel('SXR Solar Flare Energy, E$_F$ [erg]')
+    plt.ylabel('Normalized Cumulative Distribution, P(>E$_F$)')
+
+
+plot_histogram()
+plot_ffd()
 
 pass
 
