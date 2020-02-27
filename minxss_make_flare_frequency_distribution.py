@@ -110,6 +110,7 @@ def plot_adam():
     print(power_law._alpha)
 
 
+plot_manual_histogram()
 plot_histogram()
 plot_ffd()
 plot_adam()
