@@ -3,8 +3,10 @@ from scipy.io.idl import readsav
 import astropy.units as u
 import matplotlib as mpl
 import matplotlib.pyplot as plt
+import seaborn as sns
 import plfit  # Adam's code for figuring out cdfs and fitting power law's
 mpl.use('macosx')
+sns.set()
 
 
 def integrate_spectrum_energy(spectral_irradiance, energy):
