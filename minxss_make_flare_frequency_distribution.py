@@ -3,6 +3,7 @@ from scipy.io.idl import readsav
 import astropy.units as u
 import matplotlib as mpl
 import matplotlib.pyplot as plt
+import plfit  # Adam's code for figuring out cdfs and fitting power law's
 mpl.use('macosx')
 
 
@@ -50,7 +51,6 @@ for i in range(len(goes_start_jd)):
     if flare_time_indices[0].size > 1:
         photon_fluxes.append(integrate_spectrum_time(irradiance[flare_time_indices], time_jd[flare_time_indices]))
 
-
 # Now integrate that over 1 AU to get rid of the / cm^2
 photons = integrate_photon_flux_1au(photon_fluxes)
 
@@ -63,12 +63,32 @@ measured_energy = [photon * mean_energy for photon in photons]
 
 # Prepare for histograms
 m_e = np.array([m.value for m in measured_energy])
-logbins = np.geomspace(m_e.min(), m_e.max(), 30)
+log_bins = np.geomspace(m_e.min(), m_e.max(), 30)
+bin_centers = np.sqrt(log_bins[1:] * log_bins[:-1])
+
+# Count number of flares in each bin: N
+hist = np.histogram(m_e, bins=log_bins)
+n = hist[0]
+
+# Divide N by energy of its corresponding bin
+dn_de = n / bin_centers
+
+# Divide all bins by the duration of observations in years
+observation_duration_years = (minxsslevel1['time'][-1]['jd'] - minxsslevel1['time'][0]['jd']) / 365.25
+dn_de_per_year = dn_de / observation_duration_years
 
 
 # Make a histogram
+def plot_manual_histogram():
+    plt.step(bin_centers, dn_de_per_year)
+    plt.xscale('log')
+    plt.xlabel('SXR Solar Flare Energy [erg]')
+    plt.ylabel('dN/dE per year')
+
+
 def plot_histogram():
-    plt.hist(m_e, bins=logbins)
+    plt.figure()
+    plt.hist(m_e, bins=log_bins)
     plt.xscale('log')
     plt.xlabel('SXR Solar Flare Energy [erg]')
     plt.ylabel('Number [of {}]'.format(len(m_e)))
@@ -76,14 +96,23 @@ def plot_histogram():
 
 def plot_ffd():
     plt.figure()
-    plt.hist(m_e, bins=logbins, density=True, histtype='step', cumulative=-1)
+    plt.hist(m_e, bins=log_bins, density=True, histtype='step', cumulative=-1)
     plt.xscale('log')
     plt.xlabel('SXR Solar Flare Energy, E$_F$ [erg]')
     plt.ylabel('Normalized Cumulative Distribution, P(>E$_F$)')
 
 
+def plot_adam():
+    power_law = plfit.plfit(m_e)
+    plt.figure()
+    power_law.plotcdf()
+    power_law.plotpdf()
+    print(power_law._alpha)
+
+
 plot_histogram()
 plot_ffd()
+plot_adam()
 
 pass
 
