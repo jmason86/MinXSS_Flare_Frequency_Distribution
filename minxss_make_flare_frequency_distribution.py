@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import plfit  # Adam's code for figuring out cdfs and fitting power law's
 mpl.use('macosx')
-sns.set()
+#sns.set()
 
 
 def integrate_spectrum_energy(spectral_irradiance, energy):
@@ -82,8 +82,10 @@ dn_de_per_year = dn_de / observation_duration_years
 
 # Make a histogram
 def plot_manual_histogram():
+    plt.figure()
     plt.step(bin_centers, dn_de_per_year)
     plt.xscale('log')
+    plt.yscale('log')
     plt.xlabel('SXR Solar Flare Energy [erg]')
     plt.ylabel('dN/dE per year')
 
@@ -109,13 +111,24 @@ def plot_adam():
     plt.figure()
     power_law.plotcdf()
     power_law.plotpdf()
-    print(power_law._alpha)
+    print('power law fit $\alpha$ = {}'.format(power_law._alpha))
+
+
+def fit_slope():
+    mask = (bin_centers >= 2e30) & (bin_centers <= 1e32)
+    x = np.log10(bin_centers[mask])
+    y = np.log10(dn_de_per_year[mask])
+    p = np.polyfit(x, y, deg=1)
+    xfit = np.logspace(30, 32, num=30)
+    line = 10**p[1] * xfit ** p[0]
+    plt.plot(xfit, line)
+    plt.title('$\\alpha$ = {0:.2f}'.format(p[0]))
 
 
 plot_manual_histogram()
-plot_histogram()
-plot_ffd()
-plot_adam()
+fit_slope()
+#plot_histogram()
+#plot_ffd()
+#plot_adam()
 
 pass
-
