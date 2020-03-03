@@ -81,37 +81,13 @@ dn_de_per_year = dn_de / observation_duration_years
 
 
 # Make a histogram
-def plot_manual_histogram():
+def plot_energy_histogram():
     plt.figure()
     plt.step(bin_centers, dn_de_per_year)
     plt.xscale('log')
     plt.yscale('log')
     plt.xlabel('SXR Solar Flare Energy [erg]')
     plt.ylabel('dN/dE per year')
-
-
-def plot_histogram():
-    plt.figure()
-    plt.hist(m_e, bins=log_bins)
-    plt.xscale('log')
-    plt.xlabel('SXR Solar Flare Energy [erg]')
-    plt.ylabel('Number [of {}]'.format(len(m_e)))
-
-
-def plot_ffd():
-    plt.figure()
-    plt.hist(m_e, bins=log_bins, density=True, histtype='step', cumulative=-1)
-    plt.xscale('log')
-    plt.xlabel('SXR Solar Flare Energy, E$_F$ [erg]')
-    plt.ylabel('Normalized Cumulative Distribution, P(>E$_F$)')
-
-
-def plot_adam():
-    power_law = plfit.plfit(m_e)
-    plt.figure()
-    power_law.plotcdf()
-    power_law.plotpdf()
-    print('power law fit $\alpha$ = {}'.format(power_law._alpha))
 
 
 def fit_slope():
@@ -125,10 +101,7 @@ def fit_slope():
     plt.title('$\\alpha$ = {0:.2f}'.format(p[0]))
 
 
-plot_manual_histogram()
+plot_energy_histogram()
 fit_slope()
-#plot_histogram()
-#plot_ffd()
-#plot_adam()
 
 pass
