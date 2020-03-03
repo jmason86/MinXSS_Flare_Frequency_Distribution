@@ -4,7 +4,6 @@ import astropy.units as u
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 import seaborn as sns
-import plfit  # Adam's code for figuring out cdfs and fitting power law's
 mpl.use('macosx')
 #sns.set()
 
@@ -44,44 +43,47 @@ spectral_irradiance = np.stack(minxsslevel1['irradiance']) * (u.photon / u.secon
 energy = minxsslevel1[0]['energy']
 irradiance = integrate_spectrum_energy(spectral_irradiance, energy) * (u.photon / u.second / u.centimeter**2)
 
-# Now integrate that across the times of all flares
-time_jd = extract_time_jd(minxsslevel1)
-# Loop through all the flares identified by GOES
-photon_fluxes = []
-for i in range(len(goes_start_jd)):
-    flare_time_indices = np.where((time_jd >= goes_start_jd[i]) & (time_jd <= goes_end_jd[i]))
-    if flare_time_indices[0].size > 1:
-        photon_fluxes.append(integrate_spectrum_time(irradiance[flare_time_indices], time_jd[flare_time_indices]))
 
-# Now integrate that over 1 AU to get rid of the / cm^2
-photons = integrate_photon_flux_1au(photon_fluxes)
+def histogram_energy():
+    # Integrate across the times of all flares
+    time_jd = extract_time_jd(minxsslevel1)
+    # Loop through all the flares identified by GOES
+    photon_fluxes = []
+    for i in range(len(goes_start_jd)):
+        flare_time_indices = np.where((time_jd >= goes_start_jd[i]) & (time_jd <= goes_end_jd[i]))
+        if flare_time_indices[0].size > 1:
+            photon_fluxes.append(integrate_spectrum_time(irradiance[flare_time_indices], time_jd[flare_time_indices]))
 
-# Convert energy units from keV to erg
-energy = u.keV.to(u.erg, energy) * u.erg
+    # Now integrate that over 1 AU to get rid of the / cm^2
+    photons = integrate_photon_flux_1au(photon_fluxes)
 
-# Convert photons to energy
-mean_energy = np.ma.array(energy, mask=(energy < 0)).mean() / u.photon
-measured_energy = [photon * mean_energy for photon in photons]
+    # Convert energy units from keV to erg
+    energy = u.keV.to(u.erg, energy) * u.erg
 
-# Prepare for histograms
-m_e = np.array([m.value for m in measured_energy])
-log_bins = np.geomspace(m_e.min(), m_e.max(), 30)
-bin_centers = np.sqrt(log_bins[1:] * log_bins[:-1])
+    # Convert photons to energy
+    mean_energy = np.ma.array(energy, mask=(energy < 0)).mean() / u.photon
+    measured_energy = [photon * mean_energy for photon in photons]
 
-# Count number of flares in each bin: N
-hist = np.histogram(m_e, bins=log_bins)
-n = hist[0]
+    # Prepare for histograms
+    m_e = np.array([m.value for m in measured_energy])
+    log_bins = np.geomspace(m_e.min(), m_e.max(), 30)
+    bin_centers = np.sqrt(log_bins[1:] * log_bins[:-1])
 
-# Divide N by energy of its corresponding bin
-dn_de = n / bin_centers
+    # Count number of flares in each bin: N
+    hist = np.histogram(m_e, bins=log_bins)
+    n = hist[0]
 
-# Divide all bins by the duration of observations in years
-observation_duration_years = (minxsslevel1['time'][-1]['jd'] - minxsslevel1['time'][0]['jd']) / 365.25
-dn_de_per_year = dn_de / observation_duration_years
+    # Divide N by energy of its corresponding bin
+    dn_de = n / bin_centers
+
+    # Divide all bins by the duration of observations in years
+    observation_duration_years = (minxsslevel1['time'][-1]['jd'] - minxsslevel1['time'][0]['jd']) / 365.25
+    dn_de_per_year = dn_de / observation_duration_years
+
+    plot_histogram_energy(bin_centers, dn_de_per_year)
 
 
-# Make a histogram
-def plot_energy_histogram():
+def plot_histogram_energy(bin_centers, dn_de_per_year):
     plt.figure()
     plt.step(bin_centers, dn_de_per_year)
     plt.xscale('log')
