@@ -40,3 +40,14 @@ There's a lot of literature about flare frequency distributions for the sun, oth
 Those studies above that looked at the sun in X-rays were using instruments that weren't calibrated on the ground before launch. That means that when they report a number in "ergs" it's not _really_ in ergs. Those instruments were designed to do other kinds of science, so getting that calibration wasn't necessary. And they were able to do some tricks and make some assumptions to end up with numbers that are in line with the expectations from stellar observations. MinXSS _was_ calibrated on the ground at the National Institute of Standards and Technology (NIST) Syncrhotron Ultraviolet Radiation Facility (SURF). So when we compute "ergs", we can trace that all the way back to an international standard. 
 
 It's also good in science to reproduce results with new instrumentation. When things agree, we gain confidence in the conclusions we've drawn. When things don't agree, we have to question the methods and the conclusions of each study. That may seem like a result you want to avoid, but its actually the place where discovery happens. 
+
+# What's in this repository
+As of 2020-06-01, there is a jupyter notebook that I've been using to prototype the code. The main preliminary result is there at the end, but there are crucial, lingering tasks: 
+
+1. Pre-flare subtraction. You can see my initial attempt toward the middle of the notebook. This will likely require digging into each time series individually to determine a reasonable baseline level. 
+2. Filtering out bad events. There will also probably need to be some tossing out events with too few points either during baseline or during the flare. 
+3. Decide on the right start/stop times for flares
+4. Include uncertainties
+5. Fits to the time series data with their uncertainties
+
+There is also an environment.yml file that can be used to install all the required packages by just doing a `conda env create -f environment.yml` ([see conda documentation here](https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html#creating-an-environment-from-an-environment-yml-file)).  
