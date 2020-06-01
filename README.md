@@ -1,4 +1,4 @@
-# MinXSS_Flare_Frequency_Distribution
+# MinXSS Flare_Frequency Distribution
  Make a solar flare frequency distribution from the Miniature X-ray Solar Spectrometer (MinXSS) data
 
 # Intro to the MinXSS CubeSat - the satellite that took these measurements
