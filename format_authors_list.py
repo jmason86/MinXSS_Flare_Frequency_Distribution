@@ -1,8 +1,5 @@
 import pandas as pd
-import numpy as np
 
-df = pd.read_csv('~/Desktop/Student-authors.csv')
-df.columns = ['Name', 'ORCID']
 
 def sort_by_last_name(names, orcids):
     l2 = []
@@ -24,20 +21,35 @@ def sort_by_last_name(names, orcids):
 
     return names_sorted, orcids_sorted
 
-names_sorted, orcids_sorted = sort_by_last_name(df['Name'], df['ORCID'])
+def save_to_tex_format(df, filename): 
+    names_sorted, orcids_sorted = sort_by_last_name(df['Name'], df['ORCID'])
+    open(filename, 'w').close()
 
-filename = '/Users/masonjp2/Dropbox/Apps/Overleaf/Flare Frequency Distribution (FFD)/authors_phys1140.tex'
-open(filename, 'w').close()
+    for i in range(len(df.index)): 
+        name = names_sorted[i]
+        orcid = orcids_sorted[i]
 
-for i in range(len(df.index)): 
-    name = names_sorted[i]
-    orcid = orcids_sorted[i]
+        with open(filename, 'a') as text_file:
+            if str(orcid) == 'nan' or str(orcid) == ' ': 
+                print('\\author{{{}}}\n\\affiliation{{\\cu}}\n'.format(name), file=text_file)
+            else: 
+                print('\\author[{}]{{{}}}\n\\affiliation{{\\cu}}\n'.format(orcid, name), file=text_file)
 
-    with open(filename, 'a') as text_file:
-        if str(orcid) == 'nan': 
-            print('\\author{{{}}}\n\\affiliation{{\\cu}}\n'.format(name), file=text_file)
-        else: 
-            print('\\author[{}]{{{}}}\n\\affiliation{{\\cu}}\n'.format(orcid, name), file=text_file)
+
+
+# Students
+df = pd.read_csv('~/Desktop/Student-authors.csv')
+df.columns = ['Name', 'ORCID']
+filename = '/Users/masonjp2/Dropbox/Apps/Overleaf/Flare Frequency Distribution (FFD)/authors_students_phys1140.tex'
+save_to_tex_format(df, filename)
+
+
+# TAs
+df = pd.read_csv('~/Desktop/TA_authors.csv')
+df.columns = ['Email', 'Name', 'ORCID']
+filename = '/Users/masonjp2/Dropbox/Apps/Overleaf/Flare Frequency Distribution (FFD)/authors_tas_phys1140.tex'
+save_to_tex_format(df, filename)
+
 
 
 # Format should end up looking like: 
