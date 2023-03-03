@@ -38,14 +38,14 @@ def save_to_tex_format(df, filename):
 
 
 # Students
-df = pd.read_csv('~/Desktop/Student-authors.csv')
+df = pd.read_csv('./Student-authors.csv')
 df.columns = ['Name', 'ORCID']
 filename = '/Users/masonjp2/Dropbox/Apps/Overleaf/Flare Frequency Distribution (FFD)/authors_students_phys1140.tex'
 save_to_tex_format(df, filename)
 
 
 # TAs
-df = pd.read_csv('~/Desktop/TA_authors.csv')
+df = pd.read_csv('./TA_authors.csv')
 df.columns = ['Email', 'Name', 'ORCID']
 filename = '/Users/masonjp2/Dropbox/Apps/Overleaf/Flare Frequency Distribution (FFD)/authors_tas_phys1140.tex'
 save_to_tex_format(df, filename)
