@@ -36,20 +36,44 @@ def save_to_tex_format(df, filename):
                 print('\\author[{}]{{{}}}\n\\affiliation{{\\cu}}\n'.format(orcid, name), file=text_file)
 
 
+def save_to_arxiv_format(df, filename):
+    with open('all_names.txt', 'w') as file:
+        file.write(','.join(df['Name'].values))
+
+
+def save_to_mendeley_format(df, filename):
+    open(filename, 'w').close()
+
+    for name in df['Name']: 
+        *first, last = name.split()
+        
+        with open(filename, 'a') as text_file:
+            print('{}, {}'.format(last, ' '.join(first)), file=text_file)
+
 
 # Students
-df = pd.read_csv('./Student-authors.csv')
-df.columns = ['Name', 'ORCID']
+df1 = pd.read_csv('./Student-authors.csv')
+df1.columns = ['Name', 'ORCID']
 filename = '/Users/masonjp2/Dropbox/Apps/Overleaf/Flare Frequency Distribution (FFD)/authors_students_phys1140.tex'
-save_to_tex_format(df, filename)
-
+#save_to_tex_format(df1, filename)
 
 # TAs
-df = pd.read_csv('./TA_authors.csv')
-df.columns = ['Email', 'Name', 'ORCID']
+df2 = pd.read_csv('./TA_authors.csv')
+df2.columns = ['Email', 'Name', 'ORCID']
 filename = '/Users/masonjp2/Dropbox/Apps/Overleaf/Flare Frequency Distribution (FFD)/authors_tas_phys1140.tex'
-save_to_tex_format(df, filename)
+#save_to_tex_format(df2, filename)
 
+# Leads
+names = ['James Paul Mason', 'Alexandra Werth', 'Colin G. West', 'Allison A. Youngblood', 'Donald L. Woodraska', 'Courtney Peck']
+final_name = ['H. J. Lewandowski']
+
+# Output all together
+all_names_df = pd.concat([pd.Series(names), df1['Name'], df2['Name'], pd.Series(final_name)], axis=0).reset_index(drop=True)
+all_names_df = pd.DataFrame({'Name': all_names_df})
+filename_arxiv = '/Users/masonjp2/Dropbox/Apps/Overleaf/Flare Frequency Distribution (FFD)/author_names_for_arxiv.txt'
+#save_to_arxiv_format(all_names_df, filename_arxiv)
+filename_mendeley = '/Users/masonjp2/Dropbox/Apps/Overleaf/Flare Frequency Distribution (FFD)/author_names_for_mendeley.txt'
+save_to_mendeley_format(all_names_df, filename_mendeley)
 
 
 # Format should end up looking like: 
